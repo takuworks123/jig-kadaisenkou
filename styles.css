@@ -1,0 +1,41 @@
+#ListArea {
+  text-align: left;  /* 文章を左寄せする(※) */
+  float: left;     /* 左端に寄せて、後続を右側へ回り込ませる */
+
+  height: 500px;
+  width: 300px;
+  overflow-y: scroll;
+}
+
+#EditArea {
+  text-align: left; /* 文章を右寄せする */
+}
+
+#deleteList {
+  text-align: left;  /* 文章を左寄せする(※) */
+  float: left;     /* 左端に寄せて、後続を右側へ回り込ませる */
+}
+#titleList {
+  text-align: left; /* 文章を右寄せする */
+}
+
+
+
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.box {
+  border: 3px solid #666;
+  background-color: #ddd;
+  border-radius: .5em;
+  padding: 10px;
+  cursor: move;
+}
+
+.box.over {
+  border: 3px dotted #666;
+}

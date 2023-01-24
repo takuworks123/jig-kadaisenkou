@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <h1>メモ！</h1>
+
+  <div id="ListArea"></div>
+
+
+  <div id="EditArea">
+    <p id="nowEditingId"></p>
+    
+    <p>タイトル</p>
+    <input id="title" type="text"></input>
+
+    <p>メモ</p>
+    <textarea id="memo" type="text" cols="30" rows="5"></textarea>
+
+    <br>
+    <button id="save">上書き保存</button>
+    <button id="create">新しく保存</button>
+    <button id="clear">クリア</button>
+  </div>
+
+
+
+
+  <script type="module">
+    let nowKey = -1;
+    save.style.visibility = 'hidden';
+
+
+    // 画面のリロード
+    function reload(){
+      ListArea.innerHTML = '';
+      
+      save.style.visibility = 'hidden';
+      nowEditingId.textContent = '未選択';
+
+      for(let key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+          //let formCount = document.querySelectorAll('button').length;
+
+          // メモの個数分ボタンを表示
+          let newTitleButton = document.createElement('button');
+          let newDeleteButton = document.createElement('button');
+          let br = document.createElement('br');
+
+          newTitleButton.id = key;
+          newDeleteButton.id = key;
+
+          let data = localStorage.getItem(key).split('%split%');
+          newTitleButton.textContent = data[0];
+          newDeleteButton.textContent = '削除';
+
+          newTitleButton.onclick = TitleButtonClick;
+          newDeleteButton.onclick = DeleteButtonClick;
+
+          if (key == nowKey){
+            save.style.visibility = 'visible';
+            nowEditingId.textContent = data[0] + ' を編集中';
+            newTitleButton.style.backgroundColor = "lightblue";
+
+            title.value = data[0];
+            memo.value = data[1];
+
+          }else{
+            newTitleButton.style.backgroundColor = "lightgray";
+          }
+
+          document.getElementById('ListArea').appendChild(newDeleteButton);
+          document.getElementById('ListArea').appendChild(newTitleButton);
+          document.getElementById('ListArea').appendChild(br);
+        }
+      }
+    }
+
+
+    // このページを開いた時
+    window.onload = async (event) => {
+      reload();
+    }
+
+
+    // このページを閉じた時
+    window.onbeforeunload = function(){
+    }
+
+
+    // メモ一覧をクリックした時
+    function TitleButtonClick(){
+      nowKey = this.id;
+
+      reload();
+    }
+
+
+    // メモ一覧の削除ボタンを押した時
+    function DeleteButtonClick(){
+      localStorage.removeItem(this.id);
+      
+      if (nowKey == this.id){
+        nowKey = -1;
+      }
+      reload();
+    }
+
+
+    // 上書き保存ボタンを押した時
+    document.querySelector("#save").onclick = async (event) => {
+      let title = document.querySelector("#title").value;
+      let memo = document.querySelector("#memo").value;
+
+      if (title.length > 100){
+        alert('タイトルを100文字以内で記入してください');
+      }else if (memo.length > 1000){
+        alert('メモを1000文字以内で記入してください');
+      }else{
+
+        let value = title + '%split%' + memo;
+        
+        localStorage.setItem(nowKey, value);
+
+        reload();
+      }
+    }
+
+
+    // 新しく保存ボタンを押した時
+    document.querySelector("#create").onclick = async (event) => {
+      let title = document.querySelector("#title").value;
+      let memo = document.querySelector("#memo").value;
+
+      if (title.length > 100){
+        alert('タイトルを100文字以内で記入してください');
+      }else if (memo.length > 1000){
+        alert('メモを1000文字以内で記入してください');
+      }else{
+
+        let max = 0;
+        for(let key in localStorage) {
+          key = Number(key);
+          if (max < key){
+            max = key;
+          }
+        }
+        nowKey = max + 1;
+
+        let value = title + '%split%' + memo;
+        
+        localStorage.setItem(nowKey, value);
+
+        reload();
+      }
+    }
+
+
+    // クリアボタンを押した時
+    document.querySelector("#clear").onclick = async (event) => {
+      title.value = '';
+      memo.value = '';
+
+      let array = ['test', 'TEST', 'tEEEE,,,,,EEEEst']
+
+      localStorage.setItem('array', array);
+      let data = localStorage.getItem('array');
+
+      console.log(data);
+    }
+
+
+
+
+    document.querySelectorAll('.dragList li').forEach (elm => {
+      elm.ondragstart = function () {
+        event.dataTransfer.setData('text/plain', event.target.id);
+      };
+      elm.ondragover = function () {
+        event.preventDefault();
+        let rect = this.getBoundingClientRect();
+        if ((event.clientY - rect.top) < (this.clientHeight / 2)) {
+          //マウスカーソルの位置が要素の半分より上
+          this.style.borderTop = '2px solid blue';
+          this.style.borderBottom = '';
+        } else {
+          //マウスカーソルの位置が要素の半分より下
+          this.style.borderTop = '';
+          this.style.borderBottom = '2px solid blue';
+        }
+      };
+      elm.ondragleave = function () {
+        this.style.borderTop = '';
+        this.style.borderBottom = '';
+      };
+      elm.ondrop = function () {
+        event.preventDefault();
+        let id = event.dataTransfer.getData('text/plain');
+        let elm_drag = document.getElementById(id);
+
+        let rect = this.getBoundingClientRect();
+        if ((event.clientY - rect.top) < (this.clientHeight / 2)) {
+          //マウスカーソルの位置が要素の半分より上
+          this.parentNode.insertBefore(elm_drag, this);
+        } else {
+          //マウスカーソルの位置が要素の半分より下
+          this.parentNode.insertBefore(elm_drag, this.nextSibling);
+        }
+        this.style.borderTop = '';
+        this.style.borderBottom = '';
+      };
+    });
+
+
+
+  </script>
+</body>
+
+</html>
