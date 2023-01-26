@@ -10,11 +10,15 @@
 
   <h1>メモ！</h1>
 
-  <div id="ListArea"></div>
+  <div id="listArea"></div>
 
 
-  <div id="EditArea">
+  <div id="editArea">
     <p id="nowEditingId"></p>
+
+    <p>タグ</p>
+    <select id="tag"></select>
+    <input id="tagName" type="text"></input>
     
     <p>タイトル</p>
     <input id="title" type="text"></input>
@@ -26,59 +30,164 @@
     <button id="save">上書き保存</button>
     <button id="create">新しく保存</button>
     <button id="clear">クリア</button>
+    <p id="result"></p>
   </div>
 
+  
+  <h1>内部でタグ分けをしたので、あとはフロントに反映するだけ</h1>
 
 
 
   <script type="module">
+    let configName = 'config_tagList';
     let nowKey = -1;
     save.style.visibility = 'hidden';
 
 
     // 画面のリロード
     function reload(){
-      ListArea.innerHTML = '';
-      
+      listArea.innerHTML = '';
+      tag.innerHTML = '';
       save.style.visibility = 'hidden';
       nowEditingId.textContent = '未選択';
 
-      for(let key in localStorage) {
-        if (localStorage.hasOwnProperty(key)) {
-          //let formCount = document.querySelectorAll('button').length;
-
-          // メモの個数分ボタンを表示
-          let newTitleButton = document.createElement('button');
-          let newDeleteButton = document.createElement('button');
-          let br = document.createElement('br');
-
-          newTitleButton.id = key;
-          newDeleteButton.id = key;
-
-          let data = localStorage.getItem(key).split('%split%');
-          newTitleButton.textContent = data[0];
-          newDeleteButton.textContent = '削除';
-
-          newTitleButton.onclick = TitleButtonClick;
-          newDeleteButton.onclick = DeleteButtonClick;
-
-          if (key == nowKey){
-            save.style.visibility = 'visible';
-            nowEditingId.textContent = data[0] + ' を編集中';
-            newTitleButton.style.backgroundColor = "lightblue";
-
-            title.value = data[0];
-            memo.value = data[1];
-
-          }else{
-            newTitleButton.style.backgroundColor = "lightgray";
+      let newOption = document.createElement('option');
+      newOption.innerText = '新規作成';
+      tag.appendChild(newOption);
+      
+      /*
+      let tagList = localStorage.getItem(configName).split('%split%');
+      tagList.splice(0, 0, '%default-tag%'); // すべて右にずらし、インデックス0に挿入
+      let newDivList = [],
+        tagAmountList = []; // 各タグの合計個数が入る
+      if (localStorage.getItem(configName) != 'undefined'){
+        for (let i = 0; i < tagList.length; i++){
+          if (i != 0){
+            let newOption = document.createElement('option');
+            newOption.innerText = tagList[i];
+            tag.appendChild(newOption);
           }
 
-          document.getElementById('ListArea').appendChild(newDeleteButton);
-          document.getElementById('ListArea').appendChild(newTitleButton);
-          document.getElementById('ListArea').appendChild(br);
+          newDivList[i] = document.createElement('div');
+          //listArea.appendChild(newDivList[i]);
         }
       }
+      */
+
+      let newDivList = [],
+        tagAmountList = [], // 各タグの合計個数が入る
+        tagList = ['%default-tag%'],
+        tagStrAll;
+
+      newDivList[newDivList.length] = document.createElement('div'); // デフォルトタグ
+
+      // ローカルストレージの行数分、ループ
+      for(let key in localStorage) {
+        if (!localStorage.hasOwnProperty(key) || key.includes('config')) {
+          continue;
+        }
+
+        let data = localStorage.getItem(key).split('%split%');
+        let tagStr = data[0];
+
+        if (tagList.includes(tagStr)){
+          continue;
+        }
+
+        if (tagStrAll == undefined){
+          tagStrAll = tagStr;
+        }else{
+          tagStrAll += '%split%' + tagStr;
+        }
+
+        tagList[tagList.length] = tagStr;
+
+        let newOption = document.createElement('option');
+        newOption.innerText = tagStr;
+        tag.appendChild(newOption);
+
+        newDivList[newDivList.length] = document.createElement('div');
+      }
+
+      let tagIndex;
+
+      // ローカルストレージの行数分、ループ
+      for(let key in localStorage) {
+        if (!localStorage.hasOwnProperty(key) || key.includes('config')) {
+          continue;
+        }
+        
+        let data = localStorage.getItem(key).split('%split%');
+        let tagStr = data[0],
+          titleStr = data[1],
+          memoStr = data[2];
+
+        //let formCount = document.querySelectorAll('button').length;
+
+        // メモの個数分ボタンを表示
+        let newTitleButton = document.createElement('button');
+        let newDeleteButton = document.createElement('button');
+        let newBr = document.createElement('br');
+
+        newTitleButton.id = key;
+        newDeleteButton.id = key;
+
+        newTitleButton.textContent = titleStr;
+        newDeleteButton.textContent = '削除';
+
+        newTitleButton.onclick = TitleButtonClick;
+        newDeleteButton.onclick = DeleteButtonClick;
+
+        if (key == nowKey){
+          save.style.visibility = 'visible';
+          nowEditingId.textContent = '「' + titleStr + '」を編集中';
+          newTitleButton.style.backgroundColor = 'lightblue';
+
+          tag.selectedIndex = tagIndex = tagList.indexOf(tagStr);
+
+          title.value = titleStr;
+          memo.value = memoStr;
+          
+          if (tagIndex == 0){
+            tagName.disabled = false;
+          }else{
+            tagName.disabled = true;
+          }
+
+        }else{
+          newTitleButton.style.backgroundColor = "lightgray";
+          tagIndex = tagList.indexOf(tagStr);
+        }
+
+        newDivList[tagIndex].appendChild(newDeleteButton);
+        newDivList[tagIndex].appendChild(newTitleButton);
+        newDivList[tagIndex].appendChild(newBr);
+        
+        if (tagAmountList[tagIndex] == undefined){
+          tagAmountList[tagIndex] = 0;
+        }
+        tagAmountList[tagIndex]++;
+      }
+
+
+      if (localStorage.getItem(configName) != 'undefined'){
+        for (let i = 0; i < newDivList.length; i++){
+          if (tagList[tagIndex] != undefined){
+            if (i != 0){
+              let newBr = document.createElement('br');
+              listArea.appendChild(newBr);
+
+              let newLabel = document.createElement('label');
+              newLabel.textContent = 'ーー ' + tagList[i] + ' ーー';
+              listArea.appendChild(newLabel);
+            }
+
+            listArea.appendChild(newDivList[i]);
+          }
+        }
+      }
+      localStorage.setItem(configName, tagStrAll);
+
     }
 
 
@@ -89,13 +198,26 @@
 
 
     // このページを閉じた時
+    /*
     window.onbeforeunload = function(){
+    }
+    */
+
+
+    // タグのコンボボックスを変更した時
+    tag.onchange = function(){
+      if (tag.selectedIndex == 0){
+        tagName.disabled = false;
+      }else{
+        tagName.disabled = true;
+      }
+
     }
 
 
     // メモ一覧をクリックした時
     function TitleButtonClick(){
-      nowKey = this.id;
+      nowKey = this.id; // thisは押したボタンのこと
 
       reload();
     }
@@ -108,61 +230,92 @@
       if (nowKey == this.id){
         nowKey = -1;
       }
+
       reload();
+      
+      if (tag.selectedIndex == 0){
+        tagName.disabled = false;
+      }else{
+        tagName.disabled = true;
+      }
+    }
+
+
+    // 保存ボタンを押した時に
+    async function Save(flag){
+      let tagStr = tag[tag.selectedIndex].innerText;
+      let titleStr = title.value;
+      let memoStr = memo.value;
+
+      if (titleStr.length > 100){
+        alert('タイトルを100文字以内で記入してください');
+      }else if (memoStr.length > 1000){
+        alert('メモを1000文字以内で記入してください');
+      }else if (titleStr.includes('%split%') || titleStr.includes('%split%')){
+        alert('使用できない文字列がタイトル、メモのどちらかに含まれています');
+      }else{
+
+        if (flag == true){
+          let max = 0;
+          for(let key in localStorage) {
+            key = Number(key);
+            if (max < key){
+              max = key;
+            }
+          }
+          nowKey = max + 1;
+          
+          result.textContent = '新しく保存しました';
+        }else{
+          result.textContent = '上書き保存しました';
+        }
+
+        if (tag.selectedIndex == 0){ // タグを新規作成する場合
+          if (tagName.value == ''){
+            tagStr = '%default-tag%';
+
+          }else{
+            tagStr = tagName.value;
+
+            let data = localStorage.getItem(configName);
+            if (data == null){
+              localStorage.setItem(configName, tagStr);
+            }else{
+              localStorage.setItem(configName, data + '%split%' + tagStr);
+            }
+          }
+        }
+
+        
+        let value = tagStr + '%split%' + titleStr + '%split%' + memoStr;
+        
+        localStorage.setItem(nowKey, value);
+
+        reload();
+
+        setTimeout( ()=>{
+          result.textContent = '';
+        }, 3000 );
+
+      }
     }
 
 
     // 上書き保存ボタンを押した時
-    document.querySelector("#save").onclick = async (event) => {
-      let title = document.querySelector("#title").value;
-      let memo = document.querySelector("#memo").value;
-
-      if (title.length > 100){
-        alert('タイトルを100文字以内で記入してください');
-      }else if (memo.length > 1000){
-        alert('メモを1000文字以内で記入してください');
-      }else{
-
-        let value = title + '%split%' + memo;
-        
-        localStorage.setItem(nowKey, value);
-
-        reload();
-      }
+    save.onclick = async (event) => {
+      await Save(false);
     }
 
 
     // 新しく保存ボタンを押した時
-    document.querySelector("#create").onclick = async (event) => {
-      let title = document.querySelector("#title").value;
-      let memo = document.querySelector("#memo").value;
-
-      if (title.length > 100){
-        alert('タイトルを100文字以内で記入してください');
-      }else if (memo.length > 1000){
-        alert('メモを1000文字以内で記入してください');
-      }else{
-
-        let max = 0;
-        for(let key in localStorage) {
-          key = Number(key);
-          if (max < key){
-            max = key;
-          }
-        }
-        nowKey = max + 1;
-
-        let value = title + '%split%' + memo;
-        
-        localStorage.setItem(nowKey, value);
-
-        reload();
-      }
+    create.onclick = async (event) => {
+      await Save(true);
     }
 
 
     // クリアボタンを押した時
-    document.querySelector("#clear").onclick = async (event) => {
+    clear.onclick = async (event) => {
+      tagName.value = '';
       title.value = '';
       memo.value = '';
 
@@ -175,48 +328,6 @@
       console.log(data);
       */
     }
-
-
-
-
-    document.querySelectorAll('.dragList li').forEach (elm => {
-      elm.ondragstart = function () {
-        event.dataTransfer.setData('text/plain', event.target.id);
-      };
-      elm.ondragover = function () {
-        event.preventDefault();
-        let rect = this.getBoundingClientRect();
-        if ((event.clientY - rect.top) < (this.clientHeight / 2)) {
-          //マウスカーソルの位置が要素の半分より上
-          this.style.borderTop = '2px solid blue';
-          this.style.borderBottom = '';
-        } else {
-          //マウスカーソルの位置が要素の半分より下
-          this.style.borderTop = '';
-          this.style.borderBottom = '2px solid blue';
-        }
-      };
-      elm.ondragleave = function () {
-        this.style.borderTop = '';
-        this.style.borderBottom = '';
-      };
-      elm.ondrop = function () {
-        event.preventDefault();
-        let id = event.dataTransfer.getData('text/plain');
-        let elm_drag = document.getElementById(id);
-
-        let rect = this.getBoundingClientRect();
-        if ((event.clientY - rect.top) < (this.clientHeight / 2)) {
-          //マウスカーソルの位置が要素の半分より上
-          this.parentNode.insertBefore(elm_drag, this);
-        } else {
-          //マウスカーソルの位置が要素の半分より下
-          this.parentNode.insertBefore(elm_drag, this.nextSibling);
-        }
-        this.style.borderTop = '';
-        this.style.borderBottom = '';
-      };
-    });
 
 
 

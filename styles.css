@@ -1,4 +1,4 @@
-#ListArea {
+#listArea {
   text-align: left;  /* 文章を左寄せする(※) */
   float: left;     /* 左端に寄せて、後続を右側へ回り込ませる */
 
@@ -7,7 +7,7 @@
   overflow-y: scroll;
 }
 
-#EditArea {
+#editArea {
   text-align: left; /* 文章を右寄せする */
 }
 
