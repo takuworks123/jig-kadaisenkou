@@ -1,9 +1,17 @@
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+}
+
 #listArea {
+  height: 80%;
+  width: 30%;
   text-align: left;  /* 文章を左寄せする(※) */
   float: left;     /* 左端に寄せて、後続を右側へ回り込ませる */
-
-  height: 500px;
-  width: 300px;
   overflow-y: scroll;
 }
 
@@ -38,4 +46,77 @@
 
 .box.over {
   border: 3px dotted #666;
+}
+
+
+
+
+
+
+
+/* メモ一覧のメモ選択ボタン */
+#listArea button {
+	position: relative;
+	width: 45px;
+	padding: 5px;
+  border-radius: 13px;
+	text-align: center;
+	text-decoration: none;
+	color: #000000;
+	background: #ff4d4d;
+}
+#listArea button:hover {
+	 opacity: 0.8;
+	 cursor: pointer;
+	 text-decoration: none;
+}
+
+
+/* メモ一覧のタグ名 */
+#listArea p {
+	position: relative;
+  border-top: 3px solid #4245ff;
+  border-left: 10px solid #4245ff;
+}
+
+
+select {
+  font-size: 16px;
+}
+
+
+/* タイトル欄 */
+input {
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+
+/* メモ欄 */
+textarea {
+  font-size: 16px;
+  width: 40%;
+  height: 40%;
+  line-height: 20px;
+  background: linear-gradient(to bottom, #eee 1px, white 1px);
+  background-size: 100% 20px;
+  background-origin: content-box;
+  background-attachment: local;
+}
+
+
+/* メモの操作ボタン */
+#save, #create, #clear {
+  font-size: 16px;
+  text-decoration: none;
+  width: 150px;
+  margin: auto;
+  font-weight: bold;
+  border: 2px solid #27acd9;
+  color: #27acd9;
+  transition: 0.5s;
+}
+#save:hover, #create:hover, #clear:hover {
+  color: #fff;
+  background: #27acd9;
 }
