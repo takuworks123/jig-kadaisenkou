@@ -92,9 +92,9 @@
 
       newDivList[newDivList.length] = document.createElement('div'); // タグ未設定用
 
-      // tagコンボボックスの操作
-      // ローカルストレージの行数分、ループ
-      for(let key in localStorage) {
+
+      // tagリストボックスの操作
+      for(let key in localStorage) { // ローカルストレージの行数分、ループ
         if (!localStorage.hasOwnProperty(key) || key == configName) {
           continue;
         }
@@ -122,14 +122,11 @@
       }
 
 
-
-
       let tagIndex,
         showTagList = [];
 
-      // listAreaメモ一覧の操作
-      // ローカルストレージの行数分、ループ
-      for(let key in localStorage) {
+      // newDivList変数（タグとメモの関係が入る変数）を設定
+      for(let key in localStorage) { // ローカルストレージの行数分、ループ
         if (!localStorage.hasOwnProperty(key) || key == configName) {
           continue;
         }else if (searchStr != '' && !removeSymbol(key).includes(searchStr)){
@@ -140,10 +137,8 @@
         let tagStr = data[0],
           titleStr = data[1],
           memoStr = data[2];
-        
-        //let formCount = document.querySelectorAll('button').length;
 
-        // メモの個数分ボタンを表示
+        // メモの個数分ボタンを追加
         let newTitleButton = document.createElement('button');
         let newDeleteButton = document.createElement('button');
         let newBr = document.createElement('br');
@@ -193,7 +188,8 @@
         tagAmountList[tagIndex]++;
       }
 
-
+      
+      // newDivList変数の内容をlistAreaに反映
       for (let i = 0; i < newDivList.length; i++){
         if (tagList[i] != undefined && showTagList[i] == true){
           if (i != 0){
@@ -227,7 +223,7 @@
     }
 
 
-    // タグのコンボボックスを変更した時
+    // タグのリストボックスを変更した時
     tag.onchange = function(){
       if (tag.selectedIndex == 0){
         tagName.disabled = false;
