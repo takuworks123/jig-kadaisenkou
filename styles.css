@@ -1,57 +1,74 @@
-html {
-  height: 100%;
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans+JP');
+
+
+* {
+  font-family: 'Noto Sans JP', sans-serif;
 }
 
-body {
-  height: 100%;
-  margin: 0;
+h1 {
+  text-align: center;
 }
 
-#listArea {
-  height: 80%;
+
+label {
+  font-size: 18px;
+}
+
+
+/* 検索欄 */
+.searchContainer{
+  position: relative;
+  box-sizing: border-box;
+  border: 2px solid #3879D9;
+  display: block;
+  padding: 3px 10px;
+  border-radius: 3px;
+  height: 2.3em;
   width: 30%;
-  text-align: left;  /* 文章を左寄せする(※) */
-  float: left;     /* 左端に寄せて、後続を右側へ回り込ませる */
+  overflow: hidden;
+}
+.searchContainer input[type="text"]{
+  font-size: 16px;
+  border: none;
+  height: 1.5em;
+}
+.searchContainer input[type="text"]:focus {
+  outline: 0;
+}
+.searchContainer input[type="submit"]{
+  font-family: FontAwesome;
+  border: none;
+  background: #3879D9;
+  color: #fff;
+  position: absolute;
+  width: 3.5em;
+  height: 3.0em;
+  right:0px;
+  top: -5px;
+  outline : none;
+}
+.searchContainer input:hover[type="submit"]{
+  opacity: 0.8;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+
+/* メモ一覧 */
+#listArea {
+  height: 550px;
+  width: 30%;
+  text-align: left;
+  float: left; /* 左端に寄せて、後続を右側へ回り込ませる */
   overflow-y: scroll;
 }
-
-#editArea {
-  text-align: left; /* 文章を右寄せする */
-}
-
 #deleteList {
-  text-align: left;  /* 文章を左寄せする(※) */
-  float: left;     /* 左端に寄せて、後続を右側へ回り込ませる */
+  text-align: left;
+  float: left; /* 左端に寄せて、後続を右側へ回り込ませる */
 }
 #titleList {
-  text-align: left; /* 文章を右寄せする */
+  text-align: left;
 }
-
-
-
-
-.container {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-}
-
-.box {
-  border: 3px solid #666;
-  background-color: #ddd;
-  border-radius: .5em;
-  padding: 10px;
-  cursor: move;
-}
-
-.box.over {
-  border: 3px dotted #666;
-}
-
-
-
-
-
 
 
 /* メモ一覧のメモ選択ボタン */
@@ -63,7 +80,7 @@ body {
 	text-align: center;
 	text-decoration: none;
 	color: #000000;
-	background: #ff4d4d;
+	background: #ff6363;
 }
 #listArea button:hover {
 	 opacity: 0.8;
@@ -80,28 +97,55 @@ body {
 }
 
 
-select {
-  font-size: 16px;
+/* 編集欄 */
+#editArea {
+  text-align: left;
 }
 
 
-/* タイトル欄 */
-input {
-  box-sizing: border-box;
+/* タグ選択用コンボボックス */
+select {
   font-size: 16px;
+  height: 25px;
+  margin-bottom: 5px;
+}
+
+
+/*タグ名、タイトル記入欄*/
+.textbox {
+	font: 16px/20px sans-serif;
+	box-sizing: border-box;
+	width: 70%;
+	padding: 0.3em;
+	transition: 0.3s;
+	letter-spacing: 1px;
+	color: #000000;
+	border: 1px solid #1b2538;
+	border-radius: 4px;
+}
+.textbox:disabled {
+	color: #888888;
+	border: 1px solid #606060;
+  background-color: #eeeeee;
+}
+.ef .textbox:focus {
+	border: 1px solid #faffb8;
+	outline: none;
+	box-shadow: 0 0 5px 1px rgba(218,60,65, .5);
 }
 
 
 /* メモ欄 */
 textarea {
   font-size: 16px;
-  width: 40%;
+  width: 60%;
   height: 40%;
   line-height: 20px;
   background: linear-gradient(to bottom, #eee 1px, white 1px);
   background-size: 100% 20px;
   background-origin: content-box;
   background-attachment: local;
+  resize: none;
 }
 
 
@@ -109,14 +153,23 @@ textarea {
 #save, #create, #clear {
   font-size: 16px;
   text-decoration: none;
-  width: 150px;
+  width: 20%;
   margin: auto;
   font-weight: bold;
   border: 2px solid #27acd9;
   color: #27acd9;
-  transition: 0.5s;
+  transition: 0.3s;
 }
 #save:hover, #create:hover, #clear:hover {
+  cursor: pointer;
   color: #fff;
   background: #27acd9;
+}
+
+#clear {
+  border: 2px solid #ff5e5e;
+  color: #ff5e5e;
+}
+#clear:hover {
+  background: #ff5e5e;
 }
