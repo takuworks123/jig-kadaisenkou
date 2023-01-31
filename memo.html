@@ -8,25 +8,43 @@
 
 <body>
 
-  <h1>メモ</h1>
+  <h1>メモ！</h1>
+
+  <p>
+    <div class="searchContainer">
+      <input id="searchText" type="text" size="25" placeholder="キーワード">
+      <input id="search" type="submit" value="検索">
+    </div>
+  </p>
 
   <div id="listArea"></div>
 
 
   <div id="editArea">
-    <p id="nowEditingId"></p>
-
+    <p id="nowEditing"></p>
     
-    <label>タグ</label><br>
+    <label>タグ</label>
+    <br>
     <select id="tag"></select>
-    <input id="tagName" type="text"></input>
+
+    <div class="ef">
+      <input id="tagName" class="textbox" type="text"></input>
+    </div>
     
-    <br><br><label>タイトル</label><br>
-    <input id="title" type="text"></input>
+    <br>
+    <label>タイトル</label>
+    <br>
+    <div class="ef">
+      <input id="title" class="textbox" type="text"></input>
+    </div>
 
-    <br><br><label>メモ</label><br>
-    <textarea id="memo" type="text" cols="30" rows="5"></textarea>
-
+    <br>
+    <label>メモ</label>
+    <br>
+    <div class="ef">
+      <textarea id="memo" class="textbox" type="text"rows="8"></textarea>
+    </div>
+    
     <br>
     <button id="save">上書き保存</button>
     <button id="create">新しく保存</button>
@@ -38,10 +56,22 @@
 
 
   <script type="module">
-    let configName = 'config_tagList';
-    let nowKey = -1;
     save.style.visibility = 'hidden';
+    let configName = '%config%',
+      defaultTagName = '%default-tag%',
+      splitName = '%split%',
+      nowKey = -1,
+      searchStr = '';
 
+
+
+    function removeSymbol(key){
+      let searchData = localStorage.getItem(key);
+      searchData = searchData.replaceAll(configName, '');
+      searchData = searchData.replaceAll(defaultTagName, '');
+      searchData = searchData.replaceAll(splitName, '');
+      return searchData;
+    }
 
 
     // 画面のリロード
@@ -49,7 +79,7 @@
       listArea.innerHTML = '';
       tag.innerHTML = '';
       save.style.visibility = 'hidden';
-      nowEditingId.textContent = '未選択';
+      nowEditing.textContent = '未選択';
 
       let newOption = document.createElement('option');
       newOption.innerText = '新規作成';
@@ -57,19 +87,19 @@
 
       let newDivList = [],
         tagAmountList = [], // 各タグの合計個数が入る
-        tagList = ['%default-tag%'],
+        tagList = [defaultTagName],
         tagStrAll;
 
-      newDivList[newDivList.length] = document.createElement('div'); // デフォルトタグ
+      newDivList[newDivList.length] = document.createElement('div'); // タグ未設定用
 
       // tagコンボボックスの操作
       // ローカルストレージの行数分、ループ
       for(let key in localStorage) {
-        if (!localStorage.hasOwnProperty(key) || key.includes('config')) {
+        if (!localStorage.hasOwnProperty(key) || key == configName) {
           continue;
         }
 
-        let data = localStorage.getItem(key).split('%split%');
+        let data = localStorage.getItem(key).split(splitName);
         let tagStr = data[0];
 
         if (tagList.includes(tagStr)){
@@ -79,7 +109,7 @@
         if (tagStrAll == undefined){
           tagStrAll = tagStr;
         }else{
-          tagStrAll += '%split%' + tagStr;
+          tagStrAll += splitName + tagStr;
         }
 
         tagList[tagList.length] = tagStr;
@@ -94,16 +124,19 @@
 
 
 
-      let tagIndex;
+      let tagIndex,
+        showTagList = [];
 
       // listAreaメモ一覧の操作
       // ローカルストレージの行数分、ループ
       for(let key in localStorage) {
-        if (!localStorage.hasOwnProperty(key) || key.includes('config')) {
+        if (!localStorage.hasOwnProperty(key) || key == configName) {
+          continue;
+        }else if (searchStr != '' && !removeSymbol(key).includes(searchStr)){
           continue;
         }
         
-        let data = localStorage.getItem(key).split('%split%');
+        let data = localStorage.getItem(key).split(splitName);
         let tagStr = data[0],
           titleStr = data[1],
           memoStr = data[2];
@@ -124,12 +157,12 @@
         newTitleButton.onclick = TitleButtonClick;
         newDeleteButton.onclick = DeleteButtonClick;
         
-        newTitleButton.style.width = '80%';
+        newTitleButton.style.width = '70%';
         newTitleButton.style.fontSize = '16px';
 
         if (key == nowKey){
           save.style.visibility = 'visible';
-          nowEditingId.textContent = '「' + titleStr + '」を編集中';
+          nowEditing.textContent = '「' + titleStr + '」を編集中';
           newTitleButton.style.backgroundColor = 'lightblue';
 
           tag.selectedIndex = tagIndex = tagList.indexOf(tagStr);
@@ -147,6 +180,8 @@
           newTitleButton.style.backgroundColor = "lightgray";
           tagIndex = tagList.indexOf(tagStr);
         }
+        
+        showTagList[tagIndex] = true;
 
         newDivList[tagIndex].appendChild(newDeleteButton);
         newDivList[tagIndex].appendChild(newTitleButton);
@@ -160,7 +195,7 @@
 
 
       for (let i = 0; i < newDivList.length; i++){
-        if (tagList[tagIndex] != undefined){
+        if (tagList[i] != undefined && showTagList[i] == true){
           if (i != 0){
             let newBr = document.createElement('br');
             listArea.appendChild(newBr);
@@ -185,11 +220,11 @@
     }
 
 
-    // このページを閉じた時
-    /*
-    window.onbeforeunload = function(){
+    // 検索ボタンを押した時
+    search.onclick = async (event) => {
+      searchStr = searchText.value;
+      reload();
     }
-    */
 
 
     // タグのコンボボックスを変更した時
@@ -230,17 +265,23 @@
 
 
     // 保存ボタンを押した時に
-    async function Save(flag){
-      let tagStr = tag[tag.selectedIndex].innerText;
-      let titleStr = title.value;
-      let memoStr = memo.value;
+    async function memoSave(flag){
+      let tagStr = tag[tag.selectedIndex].innerText,
+        titleStr = title.value,
+        memoStr = memo.value;
 
-      if (titleStr.length > 100){
+      if (tagStr.length > 100){
+        alert('タグを100文字以内で記入してください');
+      }else if (titleStr.length > 100){
         alert('タイトルを100文字以内で記入してください');
       }else if (memoStr.length > 1000){
         alert('メモを1000文字以内で記入してください');
-      }else if (titleStr.includes('%split%') || titleStr.includes('%split%')){
-        alert('使用できない文字列がタイトル、メモのどちらかに含まれています');
+      }else if (tagStr.includes(splitName) || tagStr.includes(defaultTagName)){
+        alert('使用できない文字列が、タグに含まれています');
+      }else if (titleStr.includes(splitName) || titleStr.includes(defaultTagName)){
+        alert('使用できない文字列が、タイトルに含まれています');
+      }else if (memoStr.includes(splitName) || memoStr.includes(defaultTagName)){
+        alert('使用できない文字列が、メモに含まれています');
       }else{
 
         if (flag == true){
@@ -260,7 +301,7 @@
 
         if (tag.selectedIndex == 0){ // タグを新規作成する場合
           if (tagName.value == ''){
-            tagStr = '%default-tag%';
+            tagStr = defaultTagName;
 
           }else{
             tagStr = tagName.value;
@@ -269,13 +310,13 @@
             if (data == null){
               localStorage.setItem(configName, tagStr);
             }else{
-              localStorage.setItem(configName, data + '%split%' + tagStr);
+              localStorage.setItem(configName, data + splitName + tagStr);
             }
           }
         }
 
         
-        let value = tagStr + '%split%' + titleStr + '%split%' + memoStr;
+        let value = tagStr + splitName + titleStr + splitName + memoStr;
         
         localStorage.setItem(nowKey, value);
 
@@ -291,13 +332,13 @@
 
     // 上書き保存ボタンを押した時
     save.onclick = async (event) => {
-      await Save(false);
+      await memoSave(false);
     }
 
 
     // 新しく保存ボタンを押した時
     create.onclick = async (event) => {
-      await Save(true);
+      await memoSave(true);
     }
 
 
@@ -306,15 +347,6 @@
       tagName.value = '';
       title.value = '';
       memo.value = '';
-
-      /*
-      let array = ['test', 'TEST', 'tEEEE,,,,,EEEEst']
-
-      localStorage.setItem('array', array);
-      let data = localStorage.getItem('array');
-
-      console.log(data);
-      */
     }
 
 
