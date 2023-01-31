@@ -71,7 +71,7 @@ label {
 }
 
 
-/* メモ一覧のメモ選択ボタン */
+/* メモ一覧のメモ選択＆削除ボタン */
 #listArea button {
 	position: relative;
 	width: 45px;
@@ -103,7 +103,7 @@ label {
 }
 
 
-/* タグ選択用コンボボックス */
+/* タグ選択用リストボックス */
 select {
   font-size: 16px;
   height: 25px;
